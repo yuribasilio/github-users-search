@@ -54,6 +54,18 @@ describe("SearchBar", () => {
     expect(onSearch).not.toHaveBeenCalled();
   });
 
+  it("should not call onSearch when query contains only whitespace", async () => {
+    const user = userEvent.setup();
+    const onSearch = vi.fn();
+    render(<SearchBar onSearch={onSearch} />);
+
+    const input = screen.getByLabelText("Search GitHub users");
+    await user.type(input, "   ");
+    await user.keyboard("{Enter}");
+
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
   it("should trim whitespace from query before submitting", async () => {
     const user = userEvent.setup();
     const onSearch = vi.fn();
@@ -92,6 +104,33 @@ describe("SearchBar", () => {
     await user.click(button);
 
     expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it("should not call onSearch when submitting form with Enter key while loading", async () => {
+    const user = userEvent.setup();
+    const onSearch = vi.fn();
+    render(<SearchBar onSearch={onSearch} isLoading={true} />);
+
+    const input = screen.getByLabelText("Search GitHub users");
+    await user.type(input, "octocat");
+    await user.keyboard("{Enter}");
+
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it("should call onSearch with trimmed query when query has content and not loading", async () => {
+    const user = userEvent.setup();
+    const onSearch = vi.fn();
+    render(<SearchBar onSearch={onSearch} isLoading={false} />);
+
+    const input = screen.getByLabelText("Search GitHub users");
+    await user.type(input, "  test-user  ");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => {
+      expect(onSearch).toHaveBeenCalledWith("test-user");
+    });
+    expect(onSearch).toHaveBeenCalledTimes(1);
   });
 
   it("should use custom placeholder when provided", () => {
