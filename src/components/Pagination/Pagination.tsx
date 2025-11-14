@@ -55,41 +55,33 @@ export const Pagination: React.FC<PaginationProps> = ({
     }
   };
 
-  const getPageNumbers = () => {
-    const pages: (number | string)[] = [];
-    const maxVisible = 7;
+  const getPageNumbers = (): (number | string)[] => {
+    const MAX_VISIBLE = 7;
+    const EDGE_PAGES = 3; // Pages to show at the start/end
+    const AROUND_CURRENT = 1; // Pages to show around current page
 
-    if (totalPages <= maxVisible) {
-      // Show all pages if total is less than max visible
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
+    // Show all pages if total is small enough
+    if (totalPages <= MAX_VISIBLE) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const pages: (number | string)[] = [1];
+    const isNearStart = currentPage <= EDGE_PAGES;
+    const isNearEnd = currentPage >= totalPages - 2;
+
+    if (isNearStart) {
+      // Show: 1, 2, 3, 4, 5, ..., last
+      pages.push(...Array.from({ length: 4 }, (_, i) => i + 2));
+      pages.push("ellipsis", totalPages);
+    } else if (isNearEnd) {
+      // Show: 1, ..., last-4, last-3, last-2, last-1, last
+      pages.push("ellipsis");
+      pages.push(...Array.from({ length: 5 }, (_, i) => totalPages - 4 + i));
     } else {
-      // Always show first page
-      pages.push(1);
-
-      if (currentPage <= 3) {
-        // Show first 5 pages
-        for (let i = 2; i <= 5; i++) {
-          pages.push(i);
-        }
-        pages.push("ellipsis");
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        // Show last 5 pages
-        pages.push("ellipsis");
-        for (let i = totalPages - 4; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        // Show pages around current
-        pages.push("ellipsis");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push("ellipsis");
-        pages.push(totalPages);
-      }
+      // Show: 1, ..., current-1, current, current+1, ..., last
+      pages.push("ellipsis");
+      pages.push(...Array.from({ length: 3 }, (_, i) => currentPage - AROUND_CURRENT + i));
+      pages.push("ellipsis", totalPages);
     }
 
     return pages;
@@ -133,11 +125,10 @@ export const Pagination: React.FC<PaginationProps> = ({
               key={pageNumber}
               onClick={() => handlePageClick(pageNumber)}
               disabled={disabled}
-              className={`min-w-[2.5rem] rounded-lg px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed ${
-                isCurrentPage
-                  ? "bg-blue-600 text-white dark:bg-blue-500"
-                  : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-              } ${disabled && !isCurrentPage ? "disabled:bg-zinc-100 disabled:text-zinc-400 dark:disabled:bg-zinc-900 dark:disabled:text-zinc-600" : ""}`}
+              className={`min-w-[2.5rem] rounded-lg px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed ${isCurrentPage
+                ? "bg-blue-600 text-white dark:bg-blue-500"
+                : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                } ${disabled && !isCurrentPage ? "disabled:bg-zinc-100 disabled:text-zinc-400 dark:disabled:bg-zinc-900 dark:disabled:text-zinc-600" : ""}`}
               aria-label={`Go to page ${pageNumber}`}
               aria-current={isCurrentPage ? "page" : undefined}
             >
