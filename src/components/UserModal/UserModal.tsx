@@ -30,6 +30,21 @@ export interface UserModalProps {
  * UserModal component displays detailed user information in a modal dialog
  * Uses Radix UI Dialog for accessibility and keyboard navigation
  */
+
+const SkeletonAvatar = () => (
+  <div
+    className="h-24 w-24 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-700"
+    aria-hidden="true"
+  />
+);
+
+const SkeletonText = ({ className = "" }: { className?: string }) => (
+  <div
+    className={`h-4 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700 ${className}`}
+    aria-hidden="true"
+  />
+);
+
 export const UserModal: React.FC<UserModalProps> = ({
   user,
   open,
@@ -56,20 +71,6 @@ export const UserModal: React.FC<UserModalProps> = ({
     }
     return value.toLocaleString();
   };
-
-  const SkeletonText = ({ className = "" }: { className?: string }) => (
-    <div
-      className={`h-4 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700 ${className}`}
-      aria-hidden="true"
-    />
-  );
-
-  const SkeletonAvatar = () => (
-    <div
-      className="h-24 w-24 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-700"
-      aria-hidden="true"
-    />
-  );
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

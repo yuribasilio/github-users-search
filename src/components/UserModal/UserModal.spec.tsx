@@ -60,6 +60,17 @@ describe("UserModal", () => {
     expect(screen.getByText("GitHub's mascot")).toBeInTheDocument();
   });
 
+  it("should render user avatar image with correct attributes", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <UserModal user={mockUser} open={true} onOpenChange={onOpenChange} isLoading={false} />
+    );
+
+    const avatar = screen.getByAltText("octocat avatar");
+    expect(avatar).toBeInTheDocument();
+    expect(avatar).toHaveAttribute("src", mockUser.avatar_url);
+  });
+
   it("should show skeleton loading state when isLoading is true", () => {
     const onOpenChange = vi.fn();
     render(
@@ -69,9 +80,19 @@ describe("UserModal", () => {
     // Check for skeleton elements (they have aria-hidden="true")
     const skeletons = document.querySelectorAll('[aria-hidden="true"]');
     expect(skeletons.length).toBeGreaterThan(0);
+
+    // User information should not be visible when loading
+    expect(screen.queryByText("octocat")).not.toBeInTheDocument();
+    expect(screen.queryByText("The Octocat")).not.toBeInTheDocument();
+    expect(screen.queryByText("GitHub's mascot")).not.toBeInTheDocument();
+
+    // Loading message should be present but visually hidden
+    const loadingMessage = screen.getByText(/Loading user details/i);
+    expect(loadingMessage).toBeInTheDocument();
+    expect(loadingMessage).toHaveClass("sr-only");
   });
 
-  it("should display user statistics", () => {
+  it("should display user statistics with formatted numbers", () => {
     const onOpenChange = vi.fn();
     render(
       <UserModal user={mockUser} open={true} onOpenChange={onOpenChange} isLoading={false} />
@@ -81,6 +102,28 @@ describe("UserModal", () => {
     expect(screen.getByText("9")).toBeInTheDocument(); // following
     const eights = screen.getAllByText("8"); // repos and gists
     expect(eights.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("should format numbers as 0 when they are null or undefined", () => {
+    const onOpenChange = vi.fn();
+    const userWithNullNumbers = {
+      ...mockUser,
+      followers: null as unknown as number,
+      following: undefined as unknown as number,
+      public_repos: null as unknown as number,
+      public_gists: undefined as unknown as number,
+    };
+    render(
+      <UserModal
+        user={userWithNullNumbers}
+        open={true}
+        onOpenChange={onOpenChange}
+        isLoading={false}
+      />
+    );
+
+    const zeros = screen.getAllByText("0");
+    expect(zeros.length).toBeGreaterThanOrEqual(4);
   });
 
   it("should display user location and company", () => {
@@ -93,7 +136,33 @@ describe("UserModal", () => {
     expect(screen.getByText("GitHub")).toBeInTheDocument();
   });
 
-  it("should have link to GitHub profile", () => {
+  it("should display blog link with correct attributes", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <UserModal user={mockUser} open={true} onOpenChange={onOpenChange} isLoading={false} />
+    );
+
+    const blogLink = screen.getByText("https://github.com/blog");
+    expect(blogLink).toBeInTheDocument();
+    expect(blogLink).toHaveAttribute("href", "https://github.com/blog");
+    expect(blogLink).toHaveAttribute("target", "_blank");
+    expect(blogLink).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("should display Twitter link with correct attributes", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <UserModal user={mockUser} open={true} onOpenChange={onOpenChange} isLoading={false} />
+    );
+
+    const twitterLink = screen.getByText("@octocat");
+    expect(twitterLink).toBeInTheDocument();
+    expect(twitterLink).toHaveAttribute("href", "https://twitter.com/octocat");
+    expect(twitterLink).toHaveAttribute("target", "_blank");
+    expect(twitterLink).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("should have link to GitHub profile with correct attributes", () => {
     const onOpenChange = vi.fn();
     render(
       <UserModal user={mockUser} open={true} onOpenChange={onOpenChange} isLoading={false} />
@@ -105,7 +174,7 @@ describe("UserModal", () => {
     expect(githubLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("should call onOpenChange when close button is clicked", async () => {
+  it("should call onOpenChange when close button (X) is clicked", async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
     render(
@@ -158,6 +227,10 @@ describe("UserModal", () => {
     expect(screen.getByText("octocat")).toBeInTheDocument();
     expect(screen.queryByText("The Octocat")).not.toBeInTheDocument();
     expect(screen.queryByText("GitHub's mascot")).not.toBeInTheDocument();
+    expect(screen.queryByText("San Francisco")).not.toBeInTheDocument();
+    expect(screen.queryByText("GitHub")).not.toBeInTheDocument();
+    expect(screen.queryByText("https://github.com/blog")).not.toBeInTheDocument();
+    expect(screen.queryByText("@octocat")).not.toBeInTheDocument();
   });
 
   it("should format dates correctly", () => {
@@ -166,9 +239,39 @@ describe("UserModal", () => {
       <UserModal user={mockUser} open={true} onOpenChange={onOpenChange} isLoading={false} />
     );
 
-    // The date should be formatted as a readable string
-    const memberSince = screen.getByText(/Member Since/i).nextSibling;
-    expect(memberSince).toBeInTheDocument();
+    // The date should be formatted as a readable string (e.g., "January 25, 2011")
+    const memberSinceLabel = screen.getByText(/Member Since/i);
+    expect(memberSinceLabel).toBeInTheDocument();
+
+    // Check that the formatted date is present (should contain month name and year)
+    const dateText = memberSinceLabel.parentElement?.textContent || "";
+    // Check for month name (in English locale)
+    expect(dateText).toMatch(/January|February|March|April|May|June|July|August|September|October|November|December/);
+    // Check for the year
+    expect(dateText).toMatch(/2011/);
+    // Check that it's not just the raw ISO string
+    expect(dateText).not.toMatch(/2011-01-25/);
+  });
+
+  it("should format empty date string as empty", () => {
+    const onOpenChange = vi.fn();
+    const userWithEmptyDate = {
+      ...mockUser,
+      created_at: "",
+    };
+    render(
+      <UserModal
+        user={userWithEmptyDate}
+        open={true}
+        onOpenChange={onOpenChange}
+        isLoading={false}
+      />
+    );
+
+    const memberSinceLabel = screen.getByText(/Member Since/i);
+    const dateText = memberSinceLabel.parentElement?.textContent || "";
+    // Should only contain the label, not a date
+    expect(dateText.trim()).toBe("Member Since");
   });
 
   it("should have proper accessibility attributes", () => {
@@ -177,8 +280,31 @@ describe("UserModal", () => {
       <UserModal user={mockUser} open={true} onOpenChange={onOpenChange} isLoading={false} />
     );
 
+    // Check for dialog title
     const title = screen.getByRole("heading", { name: "octocat" });
     expect(title).toBeInTheDocument();
+
+    // Check for dialog description (sr-only class makes it visually hidden but accessible)
+    const description = screen.getByText(/Detailed information about GitHub user octocat/i);
+    expect(description).toBeInTheDocument();
+    expect(description).toHaveClass("sr-only");
+
+    // Check for close button accessibility
+    const closeButton = screen.getByLabelText("Close dialog");
+    expect(closeButton).toBeInTheDocument();
+  });
+
+  it("should display all required statistics labels", () => {
+    const onOpenChange = vi.fn();
+    render(
+      <UserModal user={mockUser} open={true} onOpenChange={onOpenChange} isLoading={false} />
+    );
+
+    expect(screen.getByText("Followers")).toBeInTheDocument();
+    expect(screen.getByText("Following")).toBeInTheDocument();
+    expect(screen.getByText("Public Repos")).toBeInTheDocument();
+    expect(screen.getByText("Public Gists")).toBeInTheDocument();
+    expect(screen.getByText("Member Since")).toBeInTheDocument();
   });
 });
 
