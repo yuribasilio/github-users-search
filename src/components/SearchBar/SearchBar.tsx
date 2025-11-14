@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { UI_TEXTS } from "@/constants/ui-texts";
 
 /**
@@ -20,6 +20,10 @@ export interface SearchBarProps {
    * Placeholder text for the search input
    */
   placeholder?: string;
+  /**
+   * Initial value for the search input (from URL params)
+   */
+  initialValue?: string;
 }
 
 /**
@@ -30,8 +34,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   isLoading = false,
   placeholder = UI_TEXTS.searchBar.placeholder,
+  initialValue = "",
 }) => {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialValue);
+
+  // Update input value when initialValue changes (from URL params)
+  useEffect(() => {
+    setQuery(initialValue);
+  }, [initialValue]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

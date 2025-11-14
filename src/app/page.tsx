@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { SearchBar } from "@/components/SearchBar";
 import { UserCard } from "@/components/UserCard";
 import { UserModal } from "@/components/UserModal";
@@ -15,6 +16,20 @@ import { UI_TEXTS } from "@/constants/ui-texts";
  * Main page for GitHub users search functionality
  */
 export default function Home() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const isInternalUpdate = useRef(false);
+
+  // Get initial values from URL
+  const getQueryFromURL = () => searchParams.get("search") || "";
+  const getPageFromURL = () => {
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    return isNaN(page) || page < 1 ? 1 : page;
+  };
+
+  const [initialQuery] = useState<string>(getQueryFromURL);
+  const [initialPage] = useState<number>(getPageFromURL);
+
   const {
     users,
     totalCount,
@@ -32,8 +47,56 @@ export default function Home() {
   const [isLoadingUserDetails, setIsLoadingUserDetails] = useState(false);
   const [userDetails, setUserDetails] = useState<GitHubUser | null>(null);
 
+  // Sync search state with URL params (for browser navigation)
+  useEffect(() => {
+    if (isInternalUpdate.current) {
+      isInternalUpdate.current = false;
+      return;
+    }
+
+    const query = getQueryFromURL();
+    const page = getPageFromURL();
+
+    // Only update if URL changed externally (browser navigation)
+    if (query) {
+      search(query, page);
+    } else {
+      search("", 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Initialize search from URL on mount
+  useEffect(() => {
+    if (initialQuery) {
+      search(initialQuery, initialPage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update URL when search or page changes
+  const updateURL = (query: string, page: number) => {
+    isInternalUpdate.current = true;
+    const params = new URLSearchParams();
+    if (query.trim()) {
+      params.set("search", query.trim());
+    }
+    if (page > 1) {
+      params.set("page", page.toString());
+    }
+    const newURL = params.toString() ? `?${params.toString()}` : "/";
+    router.push(newURL, { scroll: false });
+  };
+
   const handleSearch = async (query: string) => {
+    updateURL(query, 1);
     await search(query, 1);
+  };
+
+  const handlePageChange = (page: number) => {
+    const currentQuery = getQueryFromURL();
+    updateURL(currentQuery, page);
+    changePage(page);
   };
 
   const handleUserClick = async (user: GitHubUser) => {
@@ -57,10 +120,13 @@ export default function Home() {
     setIsLoadingUserDetails(false);
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedUser(null);
-    setUserDetails(null);
+  const handleModalOpenChange = (open: boolean) => {
+    setIsModalOpen(open);
+    if (!open) {
+      // Clear states when modal closes
+      setSelectedUser(null);
+      setUserDetails(null);
+    }
   };
 
   return (
@@ -76,7 +142,11 @@ export default function Home() {
         </div>
 
         <div className="mb-6">
-          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+          <SearchBar
+            onSearch={handleSearch}
+            isLoading={isLoading}
+            initialValue={initialQuery}
+          />
         </div>
 
         {error && (
@@ -148,7 +218,7 @@ export default function Home() {
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPageChange={changePage}
+                  onPageChange={handlePageChange}
                   disabled={isLoading}
                 />
               </div>
@@ -159,7 +229,7 @@ export default function Home() {
         <UserModal
           user={userDetails || selectedUser}
           open={isModalOpen}
-          onOpenChange={setIsModalOpen}
+          onOpenChange={handleModalOpenChange}
           isLoading={isLoadingUserDetails}
         />
       </main>

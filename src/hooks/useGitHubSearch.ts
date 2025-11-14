@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { searchUsers, getUserDetails, calculateTotalPages } from "@/services/github";
-import type { GitHubUser, GitHubSearchResponse } from "@/types/github";
+import { searchUsers, calculateTotalPages } from "@/services/github";
+import type { GitHubUser } from "@/types/github";
 import { UI_TEXTS } from "@/constants/ui-texts";
 
 interface UseGitHubSearchReturn {
