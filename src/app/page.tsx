@@ -8,6 +8,7 @@ import { Pagination } from "@/components/Pagination";
 import { useGitHubSearch } from "@/hooks/useGitHubSearch";
 import { getUserDetails } from "@/services/github";
 import type { GitHubUser } from "@/types/github";
+import { UI_TEXTS } from "@/constants/ui-texts";
 
 /**
  * Home page component
@@ -67,10 +68,10 @@ export default function Home() {
       <main className="container mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-            GitHub Users Search
+            {UI_TEXTS.homePage.title}
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400">
-            Search for GitHub users and explore their profiles
+            {UI_TEXTS.homePage.description}
           </p>
         </div>
 
@@ -88,7 +89,7 @@ export default function Home() {
               <button
                 onClick={clearError}
                 className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
-                aria-label="Dismiss error"
+                aria-label={UI_TEXTS.homePage.dismissError}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +114,9 @@ export default function Home() {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-              <p className="text-zinc-600 dark:text-zinc-400">Searching users...</p>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                {UI_TEXTS.homePage.searchingUsers}
+              </p>
             </div>
           </div>
         )}
@@ -121,7 +124,7 @@ export default function Home() {
         {!isLoading && users.length === 0 && !error && (
           <div className="py-12 text-center">
             <p className="text-zinc-600 dark:text-zinc-400">
-              Enter a search query to find GitHub users
+              {UI_TEXTS.homePage.emptyState}
             </p>
           </div>
         )}
@@ -129,8 +132,9 @@ export default function Home() {
         {users.length > 0 && (
           <>
             <div className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-              Found {totalCount.toLocaleString()} user{totalCount !== 1 ? "s" : ""}
-              {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
+              {UI_TEXTS.homePage.foundUsers(totalCount)}
+              {totalPages > 1 &&
+                ` • ${UI_TEXTS.homePage.pageInfo(currentPage, totalPages)}`}
             </div>
 
             <div className="mb-8 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

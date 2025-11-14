@@ -1,4 +1,5 @@
 import type { GitHubUser, GitHubSearchResponse, GitHubError } from "@/types/github";
+import { UI_TEXTS } from "@/constants/ui-texts";
 
 const GITHUB_API_BASE_URL =
   process.env.NEXT_PUBLIC_GITHUB_API_BASE_URL || "https://api.github.com";
@@ -17,7 +18,10 @@ export async function searchUsers(
   page: number = 1
 ): Promise<{ data: GitHubSearchResponse | null; error: GitHubError | null }> {
   if (!query.trim()) {
-    return { data: null, error: { message: "Search query cannot be empty" } };
+    return {
+      data: null,
+      error: { message: UI_TEXTS.errors.searchQueryEmpty },
+    };
   }
 
   try {
@@ -37,14 +41,15 @@ export async function searchUsers(
         return {
           data: null,
           error: {
-            message: "Rate limit exceeded. Please try again later.",
-            documentation_url: "https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting",
+            message: UI_TEXTS.errors.rateLimitExceeded,
+            documentation_url:
+              "https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting",
           },
         };
       }
 
       const errorData: GitHubError = await response.json().catch(() => ({
-        message: `HTTP error! status: ${response.status}`,
+        message: UI_TEXTS.errors.httpError(response.status),
       }));
 
       return { data: null, error: errorData };
@@ -56,7 +61,10 @@ export async function searchUsers(
     return {
       data: null,
       error: {
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message:
+          error instanceof Error
+            ? error.message
+            : UI_TEXTS.errors.unknownError,
       },
     };
   }
@@ -71,7 +79,10 @@ export async function getUserDetails(
   username: string
 ): Promise<{ data: GitHubUser | null; error: GitHubError | null }> {
   if (!username.trim()) {
-    return { data: null, error: { message: "Username cannot be empty" } };
+    return {
+      data: null,
+      error: { message: UI_TEXTS.errors.usernameEmpty },
+    };
   }
 
   try {
@@ -88,8 +99,9 @@ export async function getUserDetails(
         return {
           data: null,
           error: {
-            message: "Rate limit exceeded. Please try again later.",
-            documentation_url: "https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting",
+            message: UI_TEXTS.errors.rateLimitExceeded,
+            documentation_url:
+              "https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting",
           },
         };
       }
@@ -98,13 +110,13 @@ export async function getUserDetails(
         return {
           data: null,
           error: {
-            message: "User not found",
+            message: UI_TEXTS.errors.userNotFound,
           },
         };
       }
 
       const errorData: GitHubError = await response.json().catch(() => ({
-        message: `HTTP error! status: ${response.status}`,
+        message: UI_TEXTS.errors.httpError(response.status),
       }));
 
       return { data: null, error: errorData };
@@ -116,7 +128,10 @@ export async function getUserDetails(
     return {
       data: null,
       error: {
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message:
+          error instanceof Error
+            ? error.message
+            : UI_TEXTS.errors.unknownError,
       },
     };
   }

@@ -109,6 +109,8 @@ src/
 │   └── github.ts    # Serviço de integração com GitHub API
 ├── types/           # Tipos TypeScript compartilhados
 │   └── github.ts    # Tipos para dados do GitHub
+├── constants/       # Constantes centralizadas
+│   └── ui-texts.ts  # Textos da UI e mensagens centralizadas
 └── tests/           # Utilitários e mocks globais para testes
     └── setup-tests.ts  # Configuração de testes
 ```
@@ -211,6 +213,35 @@ Serviço que gerencia todas as interações com a API do GitHub.
 - Tratamento de erros (rate limits, 404, etc.)
 - TypeScript tipado
 - JSDoc completo
+
+## 📝 Constantes
+
+### UI Texts (ui-texts.ts)
+
+Arquivo centralizado contendo todos os textos da interface do usuário e mensagens da aplicação.
+
+**Localização**: `src/constants/ui-texts.ts`
+
+**Estrutura**:
+- `searchBar` - Textos do componente SearchBar (placeholders, labels, aria-labels)
+- `userModal` - Textos do componente UserModal (labels de campos, botões)
+- `pagination` - Textos do componente Pagination (navegação, aria-labels)
+- `homePage` - Textos da página principal (títulos, estados vazios, mensagens)
+- `userCard` - Textos do componente UserCard (aria-labels, alt texts)
+- `metadata` - Metadados da aplicação (title, description para SEO)
+- `errors` - Mensagens de erro padronizadas
+
+**Características**:
+- **Manutenibilidade**: Todos os textos em um único local facilitam atualizações
+- **Consistência**: Garante uso uniforme de textos em toda a aplicação
+- **Internacionalização**: Facilita futuras traduções (i18n)
+- **Acessibilidade**: Centraliza textos de aria-label e descrições
+- **Type-safety**: TypeScript garante que textos existam e sejam tipados
+- **Funções dinâmicas**: Suporte a textos com parâmetros (ex.: `foundUsers(count)`)
+- **Pluralização**: Lógica de pluralização integrada
+
+**Uso**:
+Todos os componentes importam `UI_TEXTS` e utilizam os textos apropriados, evitando strings hardcoded e garantindo consistência em toda a aplicação.
 
 ## 🧪 Testes
 

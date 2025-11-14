@@ -11,5 +11,10 @@ export default defineConfig({
         alias: {
             "@": path.resolve(__dirname, "./src"),
         },
+        coverage: {
+            exclude: [
+                "src/constants/ui-texts.ts",
+            ],
+        },
     },
 });

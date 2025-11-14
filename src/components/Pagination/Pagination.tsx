@@ -1,5 +1,7 @@
 "use client";
 
+import { UI_TEXTS } from "@/constants/ui-texts";
+
 /**
  * Props for Pagination component
  */
@@ -92,15 +94,15 @@ export const Pagination: React.FC<PaginationProps> = ({
   return (
     <nav
       className="flex items-center justify-center gap-2"
-      aria-label="Pagination navigation"
+      aria-label={UI_TEXTS.pagination.ariaLabel}
     >
       <button
         onClick={handlePrevious}
         disabled={disabled || currentPage === 1}
         className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-700 transition-colors hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:disabled:bg-zinc-900 dark:disabled:text-zinc-600"
-        aria-label="Go to previous page"
+        aria-label={UI_TEXTS.pagination.previousAriaLabel}
       >
-        Previous
+        {UI_TEXTS.pagination.previousButton}
       </button>
 
       <div className="flex items-center gap-1">
@@ -112,7 +114,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                 className="px-2 text-zinc-500 dark:text-zinc-400"
                 aria-hidden="true"
               >
-                ...
+                {UI_TEXTS.pagination.ellipsis}
               </span>
             );
           }
@@ -129,7 +131,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                 ? "bg-blue-600 text-white dark:bg-blue-500"
                 : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
                 } ${disabled && !isCurrentPage ? "disabled:bg-zinc-100 disabled:text-zinc-400 dark:disabled:bg-zinc-900 dark:disabled:text-zinc-600" : ""}`}
-              aria-label={`Go to page ${pageNumber}`}
+              aria-label={UI_TEXTS.pagination.pageAriaLabel(pageNumber)}
               aria-current={isCurrentPage ? "page" : undefined}
             >
               {pageNumber}
@@ -142,9 +144,9 @@ export const Pagination: React.FC<PaginationProps> = ({
         onClick={handleNext}
         disabled={disabled || currentPage === totalPages}
         className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-700 transition-colors hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:disabled:bg-zinc-900 dark:disabled:text-zinc-600"
-        aria-label="Go to next page"
+        aria-label={UI_TEXTS.pagination.nextAriaLabel}
       >
-        Next
+        {UI_TEXTS.pagination.nextButton}
       </button>
     </nav>
   );

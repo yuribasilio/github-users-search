@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { searchUsers, getUserDetails, calculateTotalPages } from "@/services/github";
 import type { GitHubUser, GitHubSearchResponse } from "@/types/github";
+import { UI_TEXTS } from "@/constants/ui-texts";
 
 interface UseGitHubSearchReturn {
   users: GitHubUser[];
@@ -60,7 +61,9 @@ export function useGitHubSearch(): UseGitHubSearchReturn {
         setCurrentPage(page);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      setError(
+        err instanceof Error ? err.message : UI_TEXTS.errors.unknownError
+      );
       setUsers([]);
       setTotalCount(0);
       setTotalPages(0);

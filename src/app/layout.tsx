@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { UI_TEXTS } from "@/constants/ui-texts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GitHub Users Search",
-  description: "Search and explore GitHub users with detailed profile information",
+  title: UI_TEXTS.metadata.title,
+  description: UI_TEXTS.metadata.description,
   icons: {
     icon: "/favicon.ico",
   },
