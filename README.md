@@ -95,30 +95,37 @@ NEXT_PUBLIC_GITHUB_RESULTS_PER_PAGE=20
 
 ```
 src/
-├── app/              # Rotas e entrypoints do Next.js App Router
-│   ├── layout.tsx    # Layout principal da aplicação
-│   └── page.tsx      # Página principal com busca de usuários
-├── components/       # Componentes da aplicação
-│   ├── SearchBar/   # Componente de busca
-│   ├── UserCard/     # Card de exibição de usuário
-│   ├── UserModal/    # Modal com detalhes do usuário
-│   └── Pagination/   # Componente de paginação
-├── hooks/           # Custom React hooks
-│   └── useGitHubSearch.ts  # Hook para gerenciar busca e paginação
-├── services/        # Integração com APIs
-│   └── github.ts    # Serviço de integração com GitHub API
-├── types/           # Tipos TypeScript compartilhados
-│   └── github.ts    # Tipos para dados do GitHub
-├── constants/       # Constantes centralizadas
-│   └── ui-texts.ts  # Textos da UI e mensagens centralizadas
-└── tests/           # Utilitários e mocks globais para testes
-    └── setup-tests.ts  # Configuração de testes
+├── app/                        # Rotas e entrypoints do Next.js App Router
+│   ├── layout.tsx              # Layout principal da aplicação
+│   ├── page.tsx                # Página principal (home)
+│   └── [search]/               # Rotas dinâmicas para busca
+│       ├── page.tsx            # Resultados da busca (página 1)
+│       └── [page]/             # Rota para paginação
+│           └── page.tsx        # Resultados da busca com paginação
+├── components/                 # Componentes da aplicação
+│   ├── SearchBar/              # Componente de busca
+│   ├── SearchPageContent/      # Componente compartilhado de busca e resultados
+│   ├── UserCard/               # Card de exibição de usuário
+│   ├── UserModal/              # Modal com detalhes do usuário
+│   └── Pagination/             # Componente de paginação
+├── hooks/                      # Custom React hooks
+│   └── useGitHubSearch.ts      # Hook para gerenciar busca e paginação
+├── services/                   # Integração com APIs
+│   └── github.ts               # Serviço de integração com GitHub API
+├── types/                      # Tipos TypeScript compartilhados
+│   └── github.ts               # Tipos para dados do GitHub
+├── constants/                  # Constantes centralizadas
+│   └── ui-texts.ts             # Textos da UI e mensagens centralizadas
+└── tests/                      # Utilitários e mocks globais para testes
+    └── setup-tests.ts          # Configuração de testes
 ```
 
 ## 🎯 Funcionalidades
 
 - **Busca de Usuários**: Busca usuários do GitHub através da API oficial
+- **URLs Amigáveis**: Rotas dinâmicas que refletem a busca e página atual (`/busca` e `/busca/2`)
 - **Paginação**: Exibe 20 resultados por página com navegação intuitiva
+- **Navegação do Browser**: Suporte a botões voltar/avançar do navegador mantendo o estado da busca
 - **Modal de Detalhes**: Ao clicar no nome do usuário, abre um modal com informações detalhadas
 - **Link para Perfil**: Botão no modal para acessar o perfil completo no GitHub
 - **Design Responsivo**: Interface adaptável para diferentes tamanhos de tela
@@ -137,11 +144,30 @@ Componente de busca que permite ao usuário inserir uma query e buscar usuários
 - `onSearch: (query: string) => void` - Callback chamado quando a busca é submetida
 - `isLoading?: boolean` - Indica se a busca está em andamento
 - `placeholder?: string` - Texto placeholder do input
+- `initialValue?: string` - Valor inicial do input (usado para sincronizar com URL)
 
 **Características**:
 - Acessível via teclado
 - Validação de entrada vazia
 - Estado de loading visual
+
+### SearchPageContent
+
+Componente compartilhado que centraliza toda a lógica de busca, exibição de resultados e paginação. É reutilizado em todas as rotas da aplicação (home, busca, busca com paginação).
+
+**Localização**: `src/components/SearchPageContent/`
+
+**Props**:
+- `searchQuery?: string` - Query de busca vinda dos parâmetros da URL
+- `page?: number` - Número da página vindo dos parâmetros da URL
+
+**Características**:
+- Sincroniza estado com URL (permite navegação do browser)
+- Gerencia busca, paginação e modal de detalhes
+- Atualiza URL automaticamente ao buscar ou mudar de página
+- Evita chamadas duplicadas à API
+- Estado de loading e tratamento de erros
+- Usado nas rotas: `/`, `/[search]`, `/[search]/[page]`
 
 ### UserCard
 
@@ -195,6 +221,21 @@ Componente de paginação para navegar entre páginas de resultados.
 - Não renderiza quando há apenas 1 página
 - Acessível via teclado
 - Estado visual da página atual
+
+## 🛣️ Estrutura de Rotas
+
+A aplicação utiliza rotas dinâmicas do Next.js App Router para URLs amigáveis:
+
+- **`/`** - Página inicial, sem busca ativa
+- **`/[search]`** - Resultados da busca na página 1 (ex: `/john-doe`)
+- **`/[search]/[page]`** - Resultados da busca em uma página específica (ex: `/john-doe/2`)
+
+**Características**:
+- URLs refletem o estado da busca e paginação
+- Suporte completo à navegação do browser (voltar/avançar)
+- Redirecionamento automático: `/busca/1` → `/busca`
+- Encoding/decoding automático da query de busca na URL
+- Estado sincronizado entre URL e componente
 
 ## 🔌 Serviços
 

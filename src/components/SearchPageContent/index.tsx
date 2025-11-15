@@ -1,0 +1,2 @@
+export { SearchPageContent } from "./SearchPageContent";
+

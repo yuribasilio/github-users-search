@@ -111,18 +111,62 @@ UI_TEXTS = {
 **Uso:**
 Todos os componentes importam `UI_TEXTS` e utilizam os textos apropriados, evitando strings hardcoded e garantindo consistência.
 
-### 6. Página principal (src/app/page.tsx)
+### 6. Estrutura de Rotas (Next.js App Router)
+
+**Rotas dinâmicas:**
+- `src/app/page.tsx` - Página inicial (home)
+- `src/app/[search]/page.tsx` - Resultados da busca (página 1)
+- `src/app/[search]/[page]/page.tsx` - Resultados da busca com paginação
 
 **Características:**
-- Orquestra componentes e hooks
+- URLs amigáveis que refletem busca e página atual
+- Suporte à navegação do browser (voltar/avançar)
+- Redirecionamento automático: `/busca/1` → `/busca`
+- Encoding/decoding da query na URL
+- Todas as rotas compartilham o componente `SearchPageContent`
+
+### 7. Componente SearchPageContent
+
+**Localização:** `src/components/SearchPageContent/`
+
+**Por quê:**
+- Centraliza lógica de busca, paginação e modal
+- Reutilizado em todas as rotas (`/`, `/[search]`, `/[search]/[page]`)
+- Evita duplicação de código
+- Sincroniza estado com URL para navegação do browser
+
+**Características:**
+- Aceita `searchQuery` e `page` como props (da URL)
+- Gerencia sincronização entre URL e estado interno
+- Evita chamadas duplicadas à API usando refs
+- Atualiza URL ao buscar ou mudar de página
 - Estados de loading, erro e vazio
 - Busca de detalhes do usuário ao abrir o modal
 - Design responsivo com grid adaptativo
 
+### 8. Páginas (src/app/)
+
+**Página inicial (page.tsx):**
+- Renderiza `SearchPageContent` sem props
+- Estado inicial vazio (sem busca)
+
+**Página de busca ([search]/page.tsx):**
+- Lê query da URL usando `decodeURIComponent`
+- Renderiza `SearchPageContent` com `searchQuery` e `page={1}`
+- Usa `React.use()` para unwrap params Promise (Next.js 15+)
+
+**Página de busca com paginação ([search]/[page]/page.tsx):**
+- Lê query e página da URL
+- Valida e normaliza número da página
+- Redireciona para `/[search]` se página for 1
+- Renderiza `SearchPageContent` com ambos os parâmetros
+
 ## Decisões técnicas
 
 ### 1. Next.js App Router
-- Roteamento moderno
+- Roteamento moderno com rotas dinâmicas
+- URLs amigáveis (`/[search]`, `/[search]/[page]`)
+- Suporte à navegação do browser
 - Server Components quando necessário
 - Otimizações automáticas
 
@@ -155,7 +199,11 @@ Todos os componentes importam `UI_TEXTS` e utilizam os textos apropriados, evita
 ## Funcionalidades implementadas
 
 - Busca de usuários via API do GitHub
+- URLs amigáveis com rotas dinâmicas (`/[search]`, `/[search]/[page]`)
+- Navegação do browser (voltar/avançar) mantendo estado
 - Paginação (20 resultados por página)
+- Sincronização de estado entre URL e componente
+- Redirecionamento automático (`/busca/1` → `/busca`)
 - Modal com detalhes do usuário
 - Link para perfil no GitHub
 - Design responsivo
@@ -164,6 +212,7 @@ Todos os componentes importam `UI_TEXTS` e utilizam os textos apropriados, evita
 - Dark mode
 - Loading states
 - Testes automatizados
+- Componente compartilhado (SearchPageContent) reutilizado em todas as rotas
 
 ## Conclusão
 
